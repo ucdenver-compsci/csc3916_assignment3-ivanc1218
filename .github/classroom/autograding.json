@@ -1,0 +1,14 @@
+{
+  "tests": [
+    {
+      "name": "Test Movies",
+      "setup": "npm install",
+      "run": "env SECRET_KEY=abc DB=\"mongodb+srv://node:apigee@webapi.7uhx2.mongodb.net/webapi?retryWrites=true&w=majority\" npm test",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": null
+    }
+  ]
+}
