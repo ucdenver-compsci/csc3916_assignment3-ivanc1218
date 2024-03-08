@@ -41,7 +41,7 @@ function getJSONObjectForMovieRequirement(req) {
     return json;
 }
 
-router.post('/signup', function(req, res) {
+router.post('/signup', (req, res) => {
     if (!req.body.username || !req.body.password) {
         res.json({success: false, msg: 'Please include both username and password to signup.'})
     } else {
@@ -61,6 +61,11 @@ router.post('/signup', function(req, res) {
             res.json({success: true, msg: 'Successfully created new user.'})
         });
     }
+});
+
+router.all('/signup', (req, res) => {
+    // Returns a message stating that the HTTP method is unsupported.
+    res.status(405).send({ message: 'HTTP method not supported.' });
 });
 
 router.post('/signin', function (req, res) {
@@ -85,6 +90,69 @@ router.post('/signin', function (req, res) {
         })
     })
 });
+
+router.all('/signin', (req, res) => {
+    // Returns a message stating that the HTTP method is unsupported.
+    res.status(405).send({ message: 'HTTP method not supported.' });
+});
+
+router.route('/movies')
+    .get((req, res) => {
+        console.log(req.body);
+        res = res.status(200);
+        if (req.get('Content-Type')) {
+            res = res.type(req.get('Content-Type'));
+        }
+        var o = getJSONObjectForMovieRequirement(req);
+        o.status = 200;
+        o.message = "GET movies";
+        res.json(o);
+    })
+
+    .post((req, res) => {
+        console.log(req.body);
+        res = res.status(200);
+        if (req.get('Content-Type')) {
+            res = res.type(req.get('Content-Type'));
+        }
+        var o = getJSONObjectForMovieRequirement(req);
+        o.status = 200;
+        o.message = "movie saved";
+        res.json(o);
+    })
+
+    .put(authJwtController.isAuthenticated, (req, res) => {
+        console.log(req.body);
+        res = res.status(200);
+        if (req.get('Content-Type')) {
+            res = res.type(req.get('Content-Type'));
+        }
+        var o = getJSONObjectForMovieRequirement(req);
+        o.status = 200;
+        o.message = "movie updated";
+        res.json(o);
+    }
+    )
+
+    .delete(authController.isAuthenticated, (req, res) => {
+        console.log(req.body);
+        res = res.status(200);
+        if (req.get('Content-Type')) {
+            res = res.type(req.get('Content-Type'));
+        }
+        var o = getJSONObjectForMovieRequirement(req);
+        o.status = 200;
+        o.message = "movie deleted";
+        res.json(o);
+    }
+    )
+    
+    .all((req, res) => {
+        // Any other HTTP Method
+        // Returns a message stating that the HTTP method is unsupported.
+        res.status(405).send({ message: 'HTTP method not supported.' });
+    }
+);
 
 app.use('/', router);
 app.listen(process.env.PORT || 8080);
