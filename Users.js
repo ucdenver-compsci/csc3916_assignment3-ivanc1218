@@ -14,7 +14,7 @@ try {
 mongoose.set('useCreateIndex', true);
 
 //user schema
-var UserSchema = new Schema({
+const UserSchema = new mongoose.Schema({
     name: String,
     username: { type: String, required: true, index: { unique: true }},
     password: { type: String, required: true, select: false }

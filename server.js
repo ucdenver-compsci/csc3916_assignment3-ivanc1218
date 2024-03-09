@@ -1,5 +1,5 @@
 /*
-CSC3916 HW2
+CSC3916 HW3
 File: Server.js
 Description: Web API scaffolding for Movie API
  */
@@ -57,9 +57,8 @@ router.post('/signup', function(req, res) {
                 else
                     return res.json(err);
             }
-
+            res.json({success: true, msg: 'Successfully created new user.'})
         });
-        res.json({success: true, msg: 'Successfully created new user.'})
     }
 });
 
@@ -77,7 +76,7 @@ router.post('/signin', function (req, res) {
         if (err) {
             res.send(err);
         }
-
+        
         user.comparePassword(userNew.password, function(isMatch) {
             if (isMatch) {
                 var userToken = { id: user.id, username: user.username };
