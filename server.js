@@ -7,12 +7,22 @@ Description: Web API scaffolding for Movie API
 var express = require('express');
 var bodyParser = require('body-parser');
 var passport = require('passport');
+var mongoose = require('mongoose');
 var authController = require('./auth');
 var authJwtController = require('./auth_jwt');
 var jwt = require('jsonwebtoken');
 var cors = require('cors');
 var User = require('./Users');
 var Movie = require('./Movies');
+
+// Database connection
+var mongoDB = 'mongodb+srv://ivancontreras1218:Eie99BjRVpJyLQUL@ivancluster.iszkdbf.mongodb.net/?retryWrites=true&w=majority&appName=IvanCluster';
+mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.once('open', function() {
+    console.log('Connected to the database.');
+});
 
 var app = express();
 app.use(cors());
@@ -145,7 +155,7 @@ router.route('/movies')
 );
 
 app.use('/', router);
-app.listen(process.env.PORT || 8080 || "https://csc3916-assignment3-ivanc1218.onrender.com");
+app.listen(process.env.PORT || 8080 );
 module.exports = app; // for testing only
 
 
