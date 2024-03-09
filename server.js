@@ -120,18 +120,77 @@ router.all('/signin', (req, res) => {
     res.status(405).send({ message: 'HTTP method not supported.' });
 });
 
-router.route('/movies')
+router.route('/movies/:title')
     .get(authJwtController.isAuthenticated, function (req, res) {
-        Movie.find({title: req.body.title}, function(err, data) {
+        Movie.findOne({title: req.params.title}, function(err, data) {
             if (err || data.length == 0) {
-                res.json({status: 400, message: "Movie ''" + req.body.title + "'' couldn't be found."})
+                res.json({status: 400, message: "Movie ''" + req.params.title + "'' couldn't be found."})
             }
             else {
-                res.json({status: 200, message: "" + req.body.title + " was found!"});
+                res.json({status: 200, message: "" + req.params.title + " was found!"});
             }
         })
     })
 
+    .post(authJwtController.isAuthenticated, (req, res) => {
+        res.json({status: 400, message: "Invalid action."})
+    })
+
+    .put(authJwtController.isAuthenticated,function(req, res) {
+        Movie.findOneAndUpdate(
+            {title: req.params.title}, { 
+                title: req.body.title,
+                releaseDate: req.body.releaseDate,
+                genre: req.body.genre,
+                actors: req.body.actors 
+            },
+            { new: true },
+            function(err, doc) {
+                if (err) {
+                    res.json({ message: "Movie could not be updated." });
+                }
+                else if (!doc) {
+                    res.json({ message: "Movie not found." });
+                }
+                else {
+                    res.json({ status: 200, message: "" + req.body.title + " UPDATED"});
+                }
+            }
+        );
+    })
+
+    .delete(authJwtController.isAuthenticated, function(req, res) {
+        Movie.findOneAndDelete({title: req.params.title}, function(err, data) {
+            if (err || data.length == 0) {
+                res.json(err);
+                res.json({message: "There was an issue trying to find your movie"})
+            }
+            else {
+                res.json({message: "" + req.params.title + " DELETED"});
+            }
+        })
+    })
+    
+    .all((req, res) => {
+        // Any other HTTP Method
+        // Returns a message stating that the HTTP method is unsupported.
+        res.status(405).send({ message: 'HTTP method not supported.' });
+    }
+);
+
+router.route('/movies')
+    .get(authJwtController.isAuthenticated, function (req, res) {
+        Movie.find({}, 'title', function(err, data) {
+            if (err || data.length == 0) {
+                res.json({status: 400, message: "No movies found."})
+            }
+            else {
+                const movieTitles = data.map(movie => movie.title);
+                res.json({status: 200, message: "Movies found!", titles: movieTitles});
+            }
+        })
+    })
+    
     .post(authJwtController.isAuthenticated, function(req, res) {
         Movie.findOne({title: req.body.title}, function(err) {
             if (err) {
@@ -149,7 +208,7 @@ router.route('/movies')
                 
                 newMovie.save(function (err) {
                     if (err) {
-                       res.json({message: err});
+                    res.json({message: err});
                     }
                     else {
                         res.json({status: 200, success: true, message: "" + req.body.title + " SAVED"});
@@ -161,36 +220,18 @@ router.route('/movies')
     })
 
     .put(authJwtController.isAuthenticated, (req, res) => {
-        console.log(req.body);
-        res = res.status(200);
-        if (req.get('Content-Type')) {
-            res = res.type(req.get('Content-Type'));
-        }
-        var o = getJSONObjectForMovieRequirement(req);
-        o.status = 200;
-        o.message = "movie updated";
-        res.json(o);
-    }
-    )
+        res.json({status: 400, message: "Invalid action."})
+    })
 
-    .delete(authController.isAuthenticated, (req, res) => {
-        res = res.status(200);
-        if (req.get('Content-Type')) {
-            res = res.type(req.get('Content-Type'));
-        }
-        var o = getJSONObjectForMovieRequirement(req);
-        o.status = 200;
-        o.message = "movie deleted";
-        res.json(o);
-    }
-    )
-    
+    .delete(authJwtController.isAuthenticated, (req, res) => {
+        res.json({status: 400, message: "Invalid action."})
+    })
+
     .all((req, res) => {
         // Any other HTTP Method
         // Returns a message stating that the HTTP method is unsupported.
         res.status(405).send({ message: 'HTTP method not supported.' });
-    }
-);
+    })
 
 app.use('/', router);
 app.listen(process.env.PORT || 8080 );
