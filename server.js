@@ -14,15 +14,30 @@ var jwt = require('jsonwebtoken');
 var cors = require('cors');
 var User = require('./Users');
 var Movie = require('./Movies');
+const { MongoClient, ServerApiVersion } = require('mongodb');
 
-// Database connection
-var mongoDB = 'mongodb+srv://ivancontreras1218:Eie99BjRVpJyLQUL@ivancluster.iszkdbf.mongodb.net/?retryWrites=true&w=majority&appName=IvanCluster';
-mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once('open', function() {
-    console.log('Connected to the database.');
+const uri = "mongodb+srv://ivancontreras1218:Eie99BjRVpJyLQUL@ivancluster.iszkdbf.mongodb.net/?retryWrites=true&w=majority&appName=IvanCluster";
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
 });
+async function run() {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    await client.connect();
+    // Send a ping to confirm a successful connection
+    await client.db("admin").command({ ping: 1 });
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
+}
+run().catch(console.dir);
 
 var app = express();
 app.use(cors());
@@ -106,20 +121,43 @@ router.all('/signin', (req, res) => {
 });
 
 router.route('/movies')
-    .get((req, res) => {
-        res = res.status(200);
-        if (req.get('Content-Type')) {
-            res = res.type(req.get('Content-Type'));
-        }
-        res.status(200).send({ message: 'GET MOVIES' });
+    .get(authJwtController.isAuthenticated, function (req, res) {
+        Movie.find({title: req.body.title}, function(err, data) {
+            if (err || data.length == 0) {
+                res.json({status: 400, message: "Movie ''" + req.body.title + "'' couldn't be found."})
+            }
+            else {
+                res.json({status: 200, message: "" + req.body.title + " was found!"});
+            }
+        })
     })
 
-    .post((req, res) => {
-        res = res.status(200);
-        if (req.get('Content-Type')) {
-            res = res.type(req.get('Content-Type'));
-        }
-        res.status(200).send({ message: 'MOVIE SAVED' });
+    .post(authJwtController.isAuthenticated, function(req, res) {
+        Movie.findOne({title: req.body.title}, function(err) {
+            if (err) {
+                res.status(400);
+            }
+            else if (req.body.actors.length < 3) {
+                res.json({message: "Not enough actors. (You need at least 3)"});
+            }
+            else {
+                var newMovie = new Movie();
+                newMovie.title = req.body.title;
+                newMovie.releaseDate = req.body.releaseDate;
+                newMovie.genre = req.body.genre;
+                newMovie.actors = req.body.actors;
+                
+                newMovie.save(function (err) {
+                    if (err) {
+                       res.json({message: err});
+                    }
+                    else {
+                        res.json({status: 200, success: true, message: "" + req.body.title + " SAVED"});
+                    }
+                });
+            }
+
+        });
     })
 
     .put(authJwtController.isAuthenticated, (req, res) => {
