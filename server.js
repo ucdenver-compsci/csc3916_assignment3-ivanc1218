@@ -13,14 +13,11 @@ var jwt = require('jsonwebtoken');
 var cors = require('cors');
 var User = require('./Users');
 var Movie = require('./Movies');
-const MongoClient = require('mongodb').MongoClient;
 
 var app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-
-let db;
 
 app.use(passport.initialize());
 
@@ -43,21 +40,6 @@ function getJSONObjectForMovieRequirement(req) {
 
     return json;
 }
-
-app.get('/users', (req, res) => {
-    db.collection('users').find({}).toArray((err, docs) => {
-        if (err) throw err;
-        
-        res.status(200).json(docs);
-    });
-});
-
-MongoClient.connect('mongodb+srv://ivancontreras1218:Eie99BjRVpJyLQUL@ivancluster.iszkdbf.mongodb.net/?retryWrites=true&w=majority&appName=IvanCluster', (err, database) => {
-    if (err) throw err;
-
-    console.log('Connected to the database.');
-    db = database;
-});
 
 router.post('/signup', function(req, res) {
     if (!req.body.username || !req.body.password) {
@@ -144,7 +126,6 @@ router.route('/movies')
     )
 
     .delete(authController.isAuthenticated, (req, res) => {
-        console.log(req.body);
         res = res.status(200);
         if (req.get('Content-Type')) {
             res = res.type(req.get('Content-Type'));
