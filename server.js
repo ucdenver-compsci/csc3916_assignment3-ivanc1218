@@ -145,7 +145,7 @@ router.route('/movies')
 );
 
 app.use('/', router);
-app.listen(process.env.PORT || 8080);
+app.listen(process.env.PORT || 8080 || "https://csc3916-assignment3-ivanc1218.onrender.com");
 module.exports = app; // for testing only
 
 
