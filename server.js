@@ -59,10 +59,6 @@ MongoClient.connect('mongodb+srv://ivancontreras1218:Eie99BjRVpJyLQUL@ivancluste
     db = database;
 });
 
-app.listen(port, () => {
-    console.log('Webserver is online at http://localhost:3000');
-});
-
 router.post('/signup', function(req, res) {
     if (!req.body.username || !req.body.password) {
         res.json({success: false, msg: 'Please include both username and password to signup.'})
