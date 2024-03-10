@@ -180,13 +180,12 @@ router.route('/movies/:title')
 
 router.route('/movies')
     .get(authJwtController.isAuthenticated, function (req, res) {
-        Movie.find({}, 'title', function(err, data) {
+        Movie.find({}, function(err, data) {
             if (err || data.length == 0) {
                 res.json({status: 400, message: "No movies found."})
             }
             else {
-                const movieTitles = data.map(movie => movie.title);
-                res.json({status: 200, message: "Movies found!", titles: movieTitles});
+                res.json({status: 200, message: "Movies found!", movies: data});
             }
         })
     })
